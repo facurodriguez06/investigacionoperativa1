@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GamiStudy - Investigación Operativa</title>
+    <style>
+        /* =========================================
+           VARIABLES CSS & TEMA "TACTICAL MANAGEMENT"
+           ========================================= */
+        :root {
+            /* Paleta Táctica (Oliva, Carbón, Ámbar) */
+            --bg-primary: #111810;
+            /* Fondo oscuro verdoso / Asfalto */
+            --bg-secondary: #1F2E1E;
+            /* Contenedores (Verde Oliva Oscuro) */
+            --bg-tertiary: #2D422B;
+            /* Elementos interactivos reposo */
+            --text-main: #E8F0E6;
+            /* Texto claro con tinte verde */
+            --accent-success: #4CAF50;
+            /* Verde éxito */
+            --accent-alert: #EF4444;
+            /* Rojo alerta */
+            --accent-warning: #FBBF24;
+            /* Amarillo precaución */
+            --accent-interactive: #F59E0B;
+            /* Ámbar táctico (Variables/Links) */
+
+            --font-body: 'Inter', 'Segoe UI', Roboto, sans-serif;
+            --font-tech: 'Fira Code', 'Courier New', monospace;
+            --transition-smooth: 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* HEADER Y NAVEGACIÓN */
+        header {
+            padding: 1.5rem 2rem;
+            background-color: var(--bg-secondary);
+            border-bottom: 2px solid var(--accent-interactive);
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
+            z-index: 10;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        header span.tech {
+            color: var(--accent-interactive);
+            font-family: var(--font-tech);
+            text-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background-color: var(--bg-tertiary);
+            color: var(--text-main);
+            border: 1px solid transparent;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover,
+        .nav-btn.active {
+            background-color: var(--accent-interactive);
+            color: #000;
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* CONTENEDOR PRINCIPAL */
+        main {
+            flex-grow: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .module-section {
+            display: none;
+            width: 100%;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .module-section.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .instructions {
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 1.1rem;
+            color: var(--accent-interactive);
+        }
+
+        /* =========================================
+           MÓDULO 1: FLASHCARDS
+           ========================================= */
+        .scene {
+            width: 100%;
+            max-width: 700px;
+            height: 380px;
+            perspective: 1200px;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform var(--transition-smooth);
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            border-radius: 12px;
+            background-color: var(--bg-secondary);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .card-front h2 {
+            font-size: 1.5rem;
+            color: var(--text-main);
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            gap: 1rem;
+        }
+
+        .card-back p {
+            font-size: 1.1rem;
+            font-family: var(--font-tech);
+            color: var(--accent-interactive);
+        }
+
+        .card-back .citation {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 1rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .controls.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .btn-action {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-action:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-easy {
+            background-color: var(--accent-success);
+            color: #000;
+        }
+
+        .btn-hard {
+            background-color: var(--accent-alert);
+            color: #fff;
+        }
+
+        /* =========================================
+           MÓDULO 2: QUIZ
+           ========================================= */
+        #quiz-container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 12px;
+            border-top: 4px solid var(--accent-interactive);
+        }
+
+        .timer-bar {
+            width: 100%;
+            height: 10px;
+            background: #000;
+            border-radius: 5px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .timer-fill {
+            height: 100%;
+            background: var(--accent-interactive);
+            width: 100%;
+            transition: width 1s linear;
+        }
+
+        .timer-fill.danger {
+            background: var(--accent-alert);
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .option-btn {
+            background: var(--bg-primary);
+            border: 2px solid var(--bg-tertiary);
+            color: var(--text-main);
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover {
+            border-color: var(--accent-interactive);
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .option-btn.correct {
+            background: var(--accent-success);
+            color: #000;
+            border-color: var(--accent-success);
+        }
+
+        .option-btn.wrong {
+            background: var(--accent-alert);
+            color: #fff;
+            border-color: var(--accent-alert);
+        }
+
+        /* =========================================
+           MÓDULO 3: DRAG & DROP
+           ========================================= */
+        .dd-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            width: 100%;
+        }
+
+        .terms-col,
+        .defs-col {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 12px;
+        }
+
+        .draggable-term {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: grab;
+            font-family: var(--font-tech);
+            font-weight: bold;
+            border: 1px solid var(--accent-interactive);
+            user-select: none;
+            text-align: center;
+        }
+
+        .draggable-term:active {
+            cursor: grabbing;
+        }
+
+        .drop-zone {
+            background: var(--bg-primary);
+            border: 2px dashed var(--bg-tertiary);
+            padding: 1rem;
+            min-height: 80px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .drop-zone.drag-over {
+            border-color: var(--accent-interactive);
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .drop-zone.matched {
+            border-color: var(--accent-success);
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        /* =========================================
+           MÓDULO 4: COMPLETAR TEXTOS
+           ========================================= */
+        .fill-container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 12px;
+            font-size: 1.3rem;
+            line-height: 2;
+            border-left: 4px solid var(--accent-interactive);
+        }
+
+        .blank-input {
+            background: var(--bg-primary);
+            border: none;
+            border-bottom: 2px solid var(--accent-interactive);
+            color: var(--accent-warning);
+            font-family: var(--font-tech);
+            font-size: 1.2rem;
+            padding: 0.2rem 0.5rem;
+            width: 160px;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .blank-input:focus {
+            border-bottom-color: var(--accent-success);
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .blank-input.correct {
+            border-bottom-color: var(--accent-success);
+            color: var(--accent-success);
+            pointer-events: none;
+        }
+
+        .blank-input.wrong {
+            border-bottom-color: var(--accent-alert);
+            color: var(--accent-alert);
+            animation: shake 0.4s;
+        }
+
+        .check-btn {
+            margin-top: 2rem;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            background: var(--accent-interactive);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            display: block;
+            width: 100%;
+        }
+
+        .check-btn:hover {
+            background: var(--accent-success);
+            color: #fff;
+            transform: translateY(-3px);
+        }
+
+        /* =========================================
+           MÓDULO 5: CLASIFICADOR
+           ========================================= */
+        .sorter-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 1000px;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .item-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            width: 100%;
+            min-height: 120px;
+            border: 2px dashed var(--bg-tertiary);
+        }
+
+        .sorter-bins {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            width: 100%;
+        }
+
+        .bin {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .bin-det {
+            border-color: var(--accent-interactive);
+        }
+
+        .bin-prob {
+            border-color: var(--accent-warning);
+        }
+
+        .bin h3 {
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+        }
+
+        .bin-items {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .sorter-item {
+            background: var(--bg-tertiary);
+            padding: 0.8rem;
+            border-radius: 6px;
+            cursor: grab;
+            font-weight: 500;
+            border-left: 3px solid var(--accent-interactive);
+        }
+
+        .sorter-item:active {
+            cursor: grabbing;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        .completion-msg {
+            text-align: center;
+            font-size: 2rem;
+            color: var(--accent-success);
+            margin-top: 2rem;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+        }
+
+        /* CONFETTI CANVAS */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* =========================================
+           RESPONSIVE: TABLETS (≤ 768px)
+           ========================================= */
+        @media (max-width: 768px) {
+            header {
+                padding: 1rem 1rem;
+                overflow-x: hidden;
+            }
+
+            header h1 {
+                font-size: 1.4rem;
+            }
+
+            nav {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 0.5rem;
+                width: 100%;
+            }
+
+            .nav-btn {
+                padding: 0.5rem 0.5rem;
+                font-size: 0.8rem;
+                text-align: center;
+                white-space: nowrap;
+            }
+
+            main {
+                padding: 1.2rem;
+            }
+
+            /* Flashcards */
+            .scene {
+                height: 320px;
+            }
+
+            .card-front h2 {
+                font-size: 1.25rem;
+            }
+
+            .card-back p {
+                font-size: 0.95rem;
+            }
+
+            .card-face {
+                padding: 1.5rem;
+            }
+
+            /* Quiz */
+            .question-text {
+                font-size: 1.1rem;
+            }
+
+            .option-btn {
+                font-size: 1rem;
+                padding: 0.85rem;
+            }
+
+            /* Drag & Drop */
+            .dd-container {
+                grid-template-columns: 1fr;
+                gap: 1.2rem;
+            }
+
+            /* Fill blanks */
+            .fill-container {
+                padding: 1.5rem;
+                font-size: 1.1rem;
+            }
+
+            .blank-input {
+                width: 130px;
+                font-size: 1rem;
+            }
+
+            /* Sorter */
+            .sorter-bins {
+                grid-template-columns: 1fr;
+                gap: 1.2rem;
+            }
+
+            .bin {
+                min-height: 200px;
+            }
+
+            .completion-msg {
+                font-size: 1.6rem;
+            }
+
+            .controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .btn-action {
+                padding: 0.7rem 1.5rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* =========================================
+           RESPONSIVE: PHONES (≤ 480px)
+           ========================================= */
+        @media (max-width: 480px) {
+            header {
+                padding: 0.8rem 0.6rem;
+            }
+
+            header h1 {
+                font-size: 1.1rem;
+                letter-spacing: 0;
+                margin-bottom: 0.6rem;
+            }
+
+            nav {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.35rem;
+            }
+
+            .nav-btn {
+                padding: 0.45rem 0.3rem;
+                font-size: 0.72rem;
+                border-radius: 5px;
+                white-space: normal;
+                word-break: break-word;
+            }
+
+            main {
+                padding: 0.8rem;
+            }
+
+            .instructions {
+                font-size: 0.95rem;
+                margin-bottom: 1.2rem;
+            }
+
+            /* Flashcards */
+            .scene {
+                height: 280px;
+                max-width: 100%;
+            }
+
+            .card-front h2 {
+                font-size: 1.05rem;
+            }
+
+            .card-back p {
+                font-size: 0.85rem;
+            }
+
+            .card-face {
+                padding: 1rem;
+            }
+
+            .card-back .citation {
+                font-size: 0.7rem;
+            }
+
+            .controls {
+                gap: 0.6rem;
+            }
+
+            .btn-action {
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+            }
+
+            /* Quiz */
+            #quiz-container {
+                padding: 1.2rem;
+            }
+
+            .question-text {
+                font-size: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .option-btn {
+                font-size: 0.9rem;
+                padding: 0.75rem;
+            }
+
+            /* Fill blanks */
+            .fill-container {
+                padding: 1rem;
+                font-size: 1rem;
+                line-height: 1.8;
+            }
+
+            .blank-input {
+                width: 100px;
+                font-size: 0.9rem;
+                padding: 0.15rem 0.3rem;
+            }
+
+            .check-btn {
+                font-size: 1rem;
+                padding: 0.85rem 1.5rem;
+            }
+
+            /* Drag & Drop */
+            .draggable-term {
+                padding: 0.75rem;
+                font-size: 0.85rem;
+            }
+
+            .drop-zone {
+                min-height: 65px;
+                padding: 0.75rem;
+            }
+
+            .drop-zone p {
+                font-size: 0.85rem !important;
+            }
+
+            /* Sorter */
+            .item-pool {
+                padding: 1rem;
+                gap: 0.7rem;
+                min-height: 90px;
+            }
+
+            .sorter-item {
+                padding: 0.65rem;
+                font-size: 0.85rem;
+            }
+
+            .bin {
+                padding: 1rem;
+                min-height: 160px;
+            }
+
+            .bin h3 {
+                font-size: 0.95rem;
+            }
+
+            .completion-msg {
+                font-size: 1.3rem;
+            }
+        }
+
+        /* =========================================
+           RESPONSIVE: VERY SMALL PHONES (≤ 360px)
+           ========================================= */
+        @media (max-width: 360px) {
+            header h1 {
+                font-size: 0.95rem;
+            }
+
+            .nav-btn {
+                padding: 0.35rem 0.45rem;
+                font-size: 0.65rem;
+            }
+
+            .scene {
+                height: 250px;
+            }
+
+            .card-front h2 {
+                font-size: 0.95rem;
+            }
+
+            .card-back p {
+                font-size: 0.8rem;
+            }
+
+            .blank-input {
+                width: 80px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Touch-friendly improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .nav-btn,
+            .option-btn,
+            .btn-action,
+            .check-btn {
+                min-height: 44px;
+            }
+
+            .draggable-term,
+            .sorter-item {
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <header>
+        <h1>GamiStudy // <span class="tech">Investigación Operativa</span></h1>
+        <nav id="main-nav">
+            <button class="nav-btn active" data-target="module-flashcards">Flashcards</button>
+            <button class="nav-btn" data-target="module-quiz">Quiz Táctico</button>
+            <button class="nav-btn" data-target="module-dragdrop">Taxonomía de Modelos</button>
+            <button class="nav-btn" data-target="module-fill">Conceptos Clave</button>
+            <button class="nav-btn" data-target="module-sorter">Escenarios de Datos</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- MÓDULO 1: FLASHCARDS -->
+        <section id="module-flashcards" class="module-section active">
+            <p class="instructions">Repaso Activo: Descubre el reverso y evalúa tu precisión.</p>
+            <div class="scene" id="flashcard-scene"></div>
+            <div class="controls" id="flashcard-controls">
+                <button class="btn-action btn-hard" id="btn-hard">Difícil (Reingresar)</button>
+                <button class="btn-action btn-easy" id="btn-easy">Fácil (Dominado)</button>
+            </div>
+        </section>
+
+        <!-- MÓDULO 2: QUIZ -->
+        <section id="module-quiz" class="module-section">
+            <p class="instructions">Resolución bajo presión: Tienes 15 segundos por consigna.</p>
+            <div id="quiz-container">
+                <div class="timer-bar">
+                    <div class="timer-fill" id="quiz-timer"></div>
+                </div>
+                <div id="quiz-content"></div>
+            </div>
+        </section>
+
+        <!-- MÓDULO 3: DRAG & DROP -->
+        <section id="module-dragdrop" class="module-section">
+            <p class="instructions">Asigna cada tipo de modelo/parámetro con su característica principal.</p>
+            <div class="dd-container">
+                <div class="terms-col" id="dd-terms"></div>
+                <div class="defs-col" id="dd-defs"></div>
+            </div>
+        </section>
+
+        <!-- MÓDULO 4: COMPLETAR TEXTOS -->
+        <section id="module-fill" class="module-section">
+            <p class="instructions">Completa la sintaxis exacta de las definiciones de I.O.</p>
+            <div class="fill-container">
+                <div id="fill-content"></div>
+                <button class="check-btn" id="btn-check-fill">Validar Modelo</button>
+            </div>
+        </section>
+
+        <!-- MÓDULO 5: CLASIFICADOR -->
+        <section id="module-sorter" class="module-section">
+            <p class="instructions">Clasifica el nivel de certeza de los datos: ¿Determinístico o Probabilístico?</p>
+            <div class="sorter-container">
+                <div class="item-pool" id="sorter-pool"></div>
+                <div class="sorter-bins">
+                    <div class="bin bin-det" data-bin="det">
+                        <h3 style="color: var(--accent-interactive);">Escenario Determinístico</h3>
+                        <div class="bin-items" id="bin-det"></div>
+                    </div>
+                    <div class="bin bin-prob" data-bin="prob">
+                        <h3 style="color: var(--accent-warning);">Escenario Probabilístico (Estocástico)</h3>
+                        <div class="bin-items" id="bin-prob"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        /**
+         * ========================================================================
+         * MOTOR CORE: DATOS DE INVESTIGACIÓN OPERATIVA (100% DE LOS APUNTES)
+         * ========================================================================
+         */
+        const StudyData = {
+            flashcards: [
+                { id: 1, front: "¿Qué es la Investigación Operativa (IO)?", back: "Es la inyección del método científico en la toma de decisiones administrativas, orientada a diseñar la operación óptima de un sistema constreñido por la asignación de recursos escasos.", cite: "Introducción" },
+                { id: 2, front: "¿Cuándo y por qué se originó la IO?", back: "En la 2° Guerra Mundial, cuando comandantes militares británicos solicitaron analizar problemas para optimizar el uso de materiales bélicos.", cite: "Orígenes" },
+                { id: 3, front: "¿Qué hito crucial ocurrió en 1947 respecto a la IO?", back: "George Dantzig desarrolló el método Simplex para la resolución de problemas de Programación Lineal.", cite: "Historia" },
+                { id: 4, front: "¿A qué se refiere el 'Mito de la Optimalidad'?", back: "La optimalidad pertenece estrictamente al modelo simbólico. En el 'Mundo Real', las fricciones estocásticas impiden que esa perfección matemática se traslade intacta.", cite: "El Mito de la Optimalidad" },
+                { id: 5, front: "¿Qué son las 'Variables de Decisión'?", back: "Son los inputs controlables del sistema operados por el tomador de decisiones (ej. precio del producto, horas asignadas al personal).", cite: "Conceptos Clave" },
+                { id: 6, front: "¿Qué son los 'Parámetros' en un modelo?", back: "Inputs incontrolables o externos regidos por el mercado o la naturaleza (ej. límite de memoria RAM disponible, tasas de interés bancarias).", cite: "Conceptos Clave" }
+            ],
+            quiz: [
+                { q: "¿Cuáles son las 4 etapas principales de la Toma de Decisiones en la construcción de modelos (según Ing. Poquet)?", options: ["Formulación, Análisis, Interpretación, Implementación", "Abstracción, Compilación, Despliegue, Monitoreo", "Mundo Real, Mundo Simbólico, Intuición, Juicio", "Programación Lineal, Simulación, Análisis, Resultados"], ans: 0 },
+                { q: "Al diseñar Kubo POS, dimensionar un clúster de servidores sabiendo EXACTAMENTE el volumen de transacciones y el costo fijo de AWS es un escenario...", options: ["Probabilístico", "Analógico", "Determinístico", "Estocástico"], ans: 2 },
+                { q: "¿Cuál de las siguientes es una razón IMPERATIVA para invertir tiempo en compilar un modelo matemático?", options: ["Para justificar el uso del Método Simplex.", "Fuerza la declaración explícita de los objetivos organizacionales.", "Evita tener que usar herramientas de software.", "Permite conocer el futuro del mercado con certeza absoluta."], ans: 1 },
+                { q: "Según la taxonomía de modelos, un 'Modelo de simulación' o 'modelo de hoja de cálculo' se clasifica como:", options: ["Modelo Físico", "Modelo Análogo", "Modelo Simbólico", "Modelo Tangible"], ans: 2 }
+            ],
+            dragDrop: [
+                { id: "dd1", term: "Modelo Físico", desc: "Naturaleza tangible, rígida y de alta fricción para modificar. Comprensión intuitiva (ej. modelo a escala de un aeroplano)." },
+                { id: "dd2", term: "Modelo Análogo", desc: "Intangible, complejidad media de modificación y comprensión (ej. un velocímetro o mapa de carreteras)." },
+                { id: "dd3", term: "Modelo Simbólico", desc: "Intangible, altamente escalable y modificable. Requiere abstracción lógica (ej. algoritmo o modelo algebraico)." },
+                { id: "dd4", term: "Medida de Desempeño", desc: "Output endógeno (Función Objetivo) que cuantifica en qué grado se alcanzó la meta (ej. minimizar costos operativos)." },
+                { id: "dd5", term: "Mundo Simbólico", desc: "El entorno local / de staging donde se construye el modelo y se aíslan las variables (Abstracción) sin riesgo de afectar Producción." }
+            ],
+            fillBlanks: [
+                { text: "El ingeniero debe migrar la situación administrativa del Mundo Real hacia un Mundo [simbolico] mediante el proceso de [abstraccion]." },
+                { text: "La invención de las PC en los 80s eliminó la barrera del [computo] intensivo, permitiendo procesar miles de cálculos antes de tocar el sistema en producción." },
+                { text: "La [medida] de Desempeño (también llamada Función [objetivo]) es el output endógeno que cuantifica en qué grado se alcanzó la meta." },
+                { text: "El método [simplex] para resolver problemas algorítmicos de Programación Lineal fue desarrollado en 1947 por George [dantzig]." }
+            ],
+            sorter: [
+                { id: "s1", text: "Optimización de tripulaciones o líneas de montaje.", type: "det" },
+                { id: "s2", text: "Lanzar Kubo POS como SaaS sin conocer la tasa de adopción del mercado.", type: "prob" },
+                { id: "s3", text: "Costo fijo conocido de las instancias de AWS.", type: "det" },
+                { id: "s4", text: "Interacción con un entorno dinámico externo (mercados, tráfico web concurrente).", type: "prob" },
+                { id: "s5", text: "Certeza Absoluta y constantes estáticas conocidas.", type: "det" },
+                { id: "s6", text: "Incertidumbre parcial, variables estocásticas y distribuciones (Monte Carlo).", type: "prob" }
+            ]
+        };
+
+        /**
+         * ========================================================================
+         * SISTEMA DE CELEBRACIÓN (CONFETTI TÁCTICO)
+         * ========================================================================
+         */
+        function fireConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let particles = [];
+            // Colores: Verde éxito, Ámbar táctico, Blanco, Amarillo
+            const colors = ['#4CAF50', '#F59E0B', '#E8F0E6', '#FBBF24'];
+
+            for (let i = 0; i < 150; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2 + 100,
+                    r: Math.random() * 6 + 2,
+                    dx: Math.random() * 10 - 5,
+                    dy: Math.random() * -10 - 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    tilt: Math.random() * 10
+                });
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let activeParticles = 0;
+                particles.forEach(p => {
+                    p.dy += 0.2; // Gravedad
+                    p.x += p.dx;
+                    p.y += p.dy;
+                    p.tilt += 0.1;
+
+                    if (p.y < canvas.height) activeParticles++;
+
+                    ctx.beginPath();
+                    ctx.lineWidth = p.r;
+                    ctx.strokeStyle = p.color;
+                    ctx.moveTo(p.x + p.tilt, p.y);
+                    ctx.lineTo(p.x + p.tilt, p.y + p.tilt);
+                    ctx.stroke();
+                });
+
+                if (activeParticles > 0) requestAnimationFrame(draw);
+                else ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            draw();
+        }
+
+        /**
+         * ========================================================================
+         * CONTROLADOR DE NAVEGACIÓN (SPA ROUTER)
+         * ========================================================================
+         */
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.module-section').forEach(s => s.classList.remove('active'));
+
+                e.target.classList.add('active');
+                const targetId = e.target.getAttribute('data-target');
+                document.getElementById(targetId).classList.add('active');
+
+                if (targetId === 'module-quiz') {
+                    if (quizApp.currentIndex < quizApp.questions.length && !quizApp.isFinished) quizApp.startTimer();
+                } else {
+                    quizApp.pauseTimer();
+                }
+            });
+        });
+
+        /**
+         * ========================================================================
+         * MÓDULO 1: FLASHCARDS
+         * ========================================================================
+         */
+        class FlashcardManager {
+            constructor(data) {
+                this.deck = [...data];
+                this.scene = document.getElementById('flashcard-scene');
+                this.controls = document.getElementById('flashcard-controls');
+                this.init();
+            }
+            init() {
+                document.getElementById('btn-easy').onclick = () => this.handleAnswer(true);
+                document.getElementById('btn-hard').onclick = () => this.handleAnswer(false);
+                this.renderCard();
+            }
+            renderCard() {
+                this.scene.innerHTML = '';
+                this.controls.classList.remove('show');
+
+                if (this.deck.length === 0) {
+                    this.scene.innerHTML = `<h2 class="completion-msg">¡Mazo Operativo Completado! 📦</h2>`;
+                    this.controls.style.display = 'none';
+                    fireConfetti();
+                    return;
+                }
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-face card-front"><h2>${this.deck[0].front}</h2></div>
+                    <div class="card-face card-back"><p>${this.deck[0].back.replace(/\n/g, '<br>')}</p><span class="citation">Fuente: ${this.deck[0].cite}</span></div>
+                `;
+
+                card.onclick = () => {
+                    card.classList.toggle('is-flipped');
+                    if (card.classList.contains('is-flipped')) {
+                        this.controls.classList.add('show');
+                    } else {
+                        this.controls.classList.remove('show');
+                    }
+                };
+
+                this.scene.appendChild(card);
+            }
+            handleAnswer(isEasy) {
+                const card = this.deck.shift();
+                if (!isEasy) this.deck.push(card);
+                const cardDOM = document.querySelector('.card');
+                cardDOM.style.transform = isEasy ? 'translateX(150%) rotateY(180deg)' : 'translateX(-150%) rotateY(180deg)';
+                cardDOM.style.opacity = '0';
+                setTimeout(() => this.renderCard(), 300);
+            }
+        }
+
+        /**
+         * ========================================================================
+         * MÓDULO 2: QUIZ
+         * ========================================================================
+         */
+        class QuizManager {
+            constructor(data) {
+                this.questions = [...data].sort(() => Math.random() - 0.5);
+                this.currentIndex = 0; this.score = 0; this.timeLeft = 15; this.isFinished = false;
+                this.container = document.getElementById('quiz-content');
+                this.timerBar = document.getElementById('quiz-timer');
+            }
+            start() {
+                this.currentIndex = 0; this.score = 0; this.isFinished = false;
+                this.questions.sort(() => Math.random() - 0.5);
+                this.renderQuestion();
+            }
+            renderQuestion() {
+                if (this.currentIndex >= this.questions.length) return this.endQuiz();
+                this.pauseTimer(); this.timeLeft = 15; this.updateTimerBar();
+                const q = this.questions[this.currentIndex];
+                let html = `<div class="question-text">${q.q}</div><div class="options-grid">`;
+                q.options.forEach((opt, index) => html += `<button class="option-btn" data-index="${index}">${opt}</button>`);
+                html += `</div>`;
+                this.container.innerHTML = html;
+                document.querySelectorAll('.option-btn').forEach(btn => btn.onclick = (e) => this.checkAnswer(parseInt(e.target.getAttribute('data-index')), e.target));
+                if (document.getElementById('module-quiz').classList.contains('active')) this.startTimer();
+            }
+            startTimer() {
+                clearInterval(this.timerInterval);
+                this.timerInterval = setInterval(() => {
+                    this.timeLeft--; this.updateTimerBar();
+                    if (this.timeLeft <= 0) { this.pauseTimer(); this.checkAnswer(-1, null); }
+                }, 1000);
+            }
+            pauseTimer() { clearInterval(this.timerInterval); }
+            updateTimerBar() {
+                const percentage = (this.timeLeft / 15) * 100;
+                this.timerBar.style.width = `${percentage}%`;
+                this.timerBar.className = percentage < 30 ? 'timer-fill danger' : 'timer-fill';
+            }
+            checkAnswer(selectedIndex, btnElement) {
+                this.pauseTimer();
+                const q = this.questions[this.currentIndex];
+                const buttons = document.querySelectorAll('.option-btn');
+                buttons.forEach(b => b.style.pointerEvents = 'none');
+                if (selectedIndex === q.ans) { if (btnElement) btnElement.classList.add('correct'); this.score++; }
+                else { if (btnElement) btnElement.classList.add('wrong'); buttons[q.ans].classList.add('correct'); }
+                setTimeout(() => { this.currentIndex++; this.renderQuestion(); }, 1800);
+            }
+            endQuiz() {
+                this.isFinished = true;
+                this.container.innerHTML = `<h2 class="completion-msg">Evaluación Finalizada</h2><p style="text-align:center; font-size: 1.5rem; margin-top:1rem;">Precisión de la métrica: ${this.score} / ${this.questions.length}</p><div style="text-align:center; margin-top:2rem;"><button class="nav-btn" onclick="quizApp.start()">Reiniciar Módulo</button></div>`;
+                this.timerBar.style.width = '0%';
+                if (this.score === this.questions.length) fireConfetti();
+            }
+        }
+
+        /**
+         * ========================================================================
+         * MÓDULO 3: DRAG & DROP
+         * ========================================================================
+         */
+        class DragDropManager {
+            constructor(data) {
+                this.data = data;
+                this.termsCol = document.getElementById('dd-terms');
+                this.defsCol = document.getElementById('dd-defs');
+                this.matches = 0;
+            }
+            init() {
+                this.termsCol.innerHTML = ''; this.defsCol.innerHTML = ''; this.matches = 0;
+                const terms = [...this.data].sort(() => Math.random() - 0.5);
+                const defs = [...this.data].sort(() => Math.random() - 0.5);
+
+                terms.forEach(item => {
+                    const el = document.createElement('div'); el.className = 'draggable-term'; el.draggable = true; el.textContent = item.term; el.dataset.id = item.id;
+                    el.ondragstart = (e) => { e.dataTransfer.setData('text/plain', item.id); setTimeout(() => el.style.opacity = '0.4', 0); };
+                    el.ondragend = () => el.style.opacity = '1';
+                    this.termsCol.appendChild(el);
+                });
+
+                defs.forEach(item => {
+                    const zone = document.createElement('div'); zone.className = 'drop-zone'; zone.dataset.matchId = item.id;
+                    zone.innerHTML = `<p style="pointer-events:none; font-size:0.95rem; text-align:center;">${item.desc}</p>`;
+                    zone.ondragover = e => { e.preventDefault(); if (!zone.classList.contains('matched')) zone.classList.add('drag-over'); };
+                    zone.ondragleave = () => zone.classList.remove('drag-over');
+                    zone.ondrop = e => this.handleDrop(e, zone);
+                    this.defsCol.appendChild(zone);
+                });
+            }
+            handleDrop(e, zone) {
+                e.preventDefault(); zone.classList.remove('drag-over');
+                if (zone.classList.contains('matched')) return;
+                const draggedId = e.dataTransfer.getData('text/plain');
+                if (draggedId === zone.dataset.matchId) {
+                    const draggedEl = document.querySelector(`.draggable-term[data-id="${draggedId}"]`);
+                    zone.innerHTML = ''; zone.appendChild(draggedEl);
+                    draggedEl.draggable = false; draggedEl.style.margin = '0'; draggedEl.style.border = 'none';
+                    zone.classList.add('matched'); this.matches++;
+                    if (this.matches === this.data.length) { setTimeout(() => fireConfetti(), 300); }
+                } else {
+                    const origBorder = zone.style.borderColor;
+                    zone.style.borderColor = 'var(--accent-alert)'; setTimeout(() => zone.style.borderColor = origBorder, 500);
+                }
+            }
+        }
+
+        /**
+         * ========================================================================
+         * MÓDULO 4: COMPLETAR TEXTOS
+         * ========================================================================
+         */
+        class FillBlanksManager {
+            constructor(data) {
+                this.data = data;
+                this.container = document.getElementById('fill-content');
+                this.btnCheck = document.getElementById('btn-check-fill');
+                this.init();
+            }
+            init() {
+                this.container.innerHTML = '';
+                this.data.forEach((item, index) => {
+                    // Remover acentos para facilitar la validación
+                    let htmlText = item.text.replace(/\[(.*?)\]/g, (match, p1) => {
+                        const cleanAnswer = p1.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+                        return `<input type="text" class="blank-input" data-answer="${cleanAnswer}" autocomplete="off">`;
+                    });
+                    this.container.innerHTML += `<p style="margin-bottom: 1.5rem;">${index + 1}. ${htmlText}</p>`;
+                });
+
+                this.btnCheck.onclick = () => this.checkAnswers();
+            }
+            checkAnswers() {
+                const inputs = this.container.querySelectorAll('.blank-input');
+                let allCorrect = true;
+
+                inputs.forEach(input => {
+                    const answer = input.getAttribute('data-answer');
+                    const userVal = input.value.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+                    if (userVal === answer) {
+                        input.classList.remove('wrong');
+                        input.classList.add('correct');
+                    } else {
+                        input.classList.remove('correct');
+                        input.classList.add('wrong');
+                        allCorrect = false;
+                        void input.offsetWidth;
+                    }
+                });
+
+                if (allCorrect) {
+                    this.btnCheck.textContent = "¡Modelo Optimizado 100%!";
+                    this.btnCheck.style.backgroundColor = "var(--accent-success)";
+                    this.btnCheck.style.color = "#fff";
+                    fireConfetti();
+                }
+            }
+        }
+
+        /**
+         * ========================================================================
+         * MÓDULO 5: CLASIFICADOR (DETERMINÍSTICO VS PROBABILÍSTICO)
+         * ========================================================================
+         */
+        class BinarySorterManager {
+            constructor(data) {
+                this.data = [...data].sort(() => Math.random() - 0.5);
+                this.pool = document.getElementById('sorter-pool');
+                this.init();
+            }
+            init() {
+                this.pool.innerHTML = '';
+                document.getElementById('bin-det').innerHTML = '';
+                document.getElementById('bin-prob').innerHTML = '';
+
+                this.data.forEach(item => {
+                    const el = document.createElement('div');
+                    el.className = 'sorter-item';
+                    el.draggable = true;
+                    el.textContent = item.text;
+                    el.dataset.type = item.type;
+
+                    el.ondragstart = (e) => { e.dataTransfer.setData('text/plain', item.type); e.dataTransfer.setData('text/id', item.id); el.id = item.id; setTimeout(() => el.style.opacity = '0.4', 0); };
+                    el.ondragend = () => el.style.opacity = '1';
+
+                    this.pool.appendChild(el);
+                });
+
+                document.querySelectorAll('.bin').forEach(bin => {
+                    bin.ondragover = e => { e.preventDefault(); bin.style.backgroundColor = 'rgba(255,255,255,0.05)'; };
+                    bin.ondragleave = () => bin.style.backgroundColor = 'var(--bg-secondary)';
+                    bin.ondrop = e => this.handleDrop(e, bin);
+                });
+            }
+
+            handleDrop(e, bin) {
+                e.preventDefault();
+                bin.style.backgroundColor = 'var(--bg-secondary)';
+
+                const expectedType = bin.getAttribute('data-bin');
+                const draggedType = e.dataTransfer.getData('text/plain');
+                const draggedId = e.dataTransfer.getData('text/id');
+
+                if (draggedType === expectedType) {
+                    const draggedEl = document.getElementById(draggedId);
+                    draggedEl.style.margin = '0';
+                    draggedEl.style.backgroundColor = 'var(--bg-primary)';
+                    draggedEl.style.border = `1px solid ${expectedType === 'det' ? 'var(--accent-interactive)' : 'var(--accent-warning)'}`;
+                    draggedEl.draggable = false;
+
+                    bin.querySelector('.bin-items').appendChild(draggedEl);
+
+                    if (this.pool.children.length === 0) fireConfetti();
+                } else {
+                    const el = document.getElementById(draggedId);
+                    el.style.backgroundColor = 'var(--accent-alert)';
+                    setTimeout(() => el.style.backgroundColor = 'var(--bg-tertiary)', 400);
+                }
+            }
+        }
+
+        // =========================================
+        // INICIALIZACIÓN
+        // =========================================
+        const flashcardApp = new FlashcardManager(StudyData.flashcards);
+        const quizApp = new QuizManager(StudyData.quiz);
+        const ddApp = new DragDropManager(StudyData.dragDrop);
+        const fillApp = new FillBlanksManager(StudyData.fillBlanks);
+        const sorterApp = new BinarySorterManager(StudyData.sorter);
+
+        quizApp.start();
+        ddApp.init();
+
+    </script>
+</body>
+
+</html>
